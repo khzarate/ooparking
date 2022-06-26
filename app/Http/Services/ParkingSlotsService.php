@@ -15,6 +15,8 @@ class ParkingSlotsService
 
     public function getClosestAndAvailableSlot($entry_point, $vehicle_type){
         $available_slot = ParkingSlots::where('parked_vehicle_id', NULL);
+
+        //get possible parking slot type for the specific vehicle type
         switch ($vehicle_type) {
             case 'S':
                 $available_slot = $available_slot->whereIn('slot_type', ['1', '2', '3']);
@@ -29,6 +31,7 @@ class ParkingSlotsService
 
         $available_slot = $available_slot->orderBy('slot_type', 'ASC');
 
+        //get the closest available slot from the vehicle's entry_point
         switch ($entry_point) {
             case '1':
                 $available_slot = $available_slot->orderBy('entry_1_distance', 'ASC');

@@ -54,8 +54,7 @@
             transition
             ease-in-out
             m-0
-            focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example" v-model="input.vehicle_type">
-                <option selected>Select Vehicle Type</option>
+            focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" v-model="input.vehicle_type">
                 <option v-for="type in vehicleTypeOptions" :key="type.id" :value="type.value">{{ type.label }}</option>
             </select>
             <yupValidationError :error="errors.vehicle_type"/>
@@ -77,8 +76,7 @@
             transition
             ease-in-out
             m-0
-            focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example" v-model="input.entry_point">
-                <option selected>Select Entry Point</option>
+            focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" v-model="input.entry_point">
                 <option v-for="type in entryExitPointsOptions" :key="type.id" :value="type.value">{{ type.label }}</option>
             </select>
             <yupValidationError :error="errors.entry_point"/>
@@ -144,8 +142,7 @@
             transition
             ease-in-out
             m-0
-            focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example" v-model="input.exit_point">
-                <option selected>Select Entry Point</option>
+            focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" v-model="input.exit_point">
                 <option v-for="type in entryExitPointsOptions" :key="type.id" :value="type.value">{{ type.label }}</option>
             </select>
             <yupValidationError :error="errors.exit_point"/>
@@ -247,7 +244,6 @@
                     const { response } = await useAsync(
                         parkingServices.parkVehicle(payload)
                     );
-                    console.log(response);  
                     if(response.status == 200){
                         Swal.fire({
                             icon: 'success',

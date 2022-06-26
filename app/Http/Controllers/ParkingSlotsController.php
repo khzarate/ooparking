@@ -122,6 +122,7 @@ class ParkingSlotsController extends Controller
             //get parked vehicle data
             $vehicle = $this->parkedVehiclesService->checkParkedVehicle($request->plate_number);
             if($vehicle){
+                //Check if the vehicle is still parked
                 if($vehicle->time_out == null){
                     $time_out = $request->time_out;
                     $parking_slot = $this->parkingSlotsService->getParkingSlot($vehicle->parking_slot_id);
@@ -134,6 +135,7 @@ class ParkingSlotsController extends Controller
 
                     $text = "<p>
                             Plate Number: ".$request->plate_number."<br/>".
+                            "Parking Slot: ".$parking_slot->id."-".$this->convertSlotType($parking_slot->slot_type)."<br/>".
                             "Parking Fee: ₱".number_format($parking_fee,2)."<br/>".
                             "Time In: ".$vehicle->time_in."<br/>".
                             "Time Out: ".$time_out."<br/>".
@@ -144,7 +146,7 @@ class ParkingSlotsController extends Controller
                     return response()->json(['message' => 'Exit parking successful', "text" => $text], 200);
 
                 } else {
-                    return response()->json(['message' => 'Vehicle already exited the parking'], 200);
+                    return response()->json(['message' => 'No parked vehicle found'], 202);
                 }
 
             } else {
