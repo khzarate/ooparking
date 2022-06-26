@@ -18,10 +18,6 @@ use App\Http\Controllers\ParkingSlotsController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::post('/park-vehicle', [ParkingSlotsController::class, 'parkVehicle'])->name('park.vehicle');
 Route::post('/unpark-vehicle', [ParkingSlotsController::class, 'unparkVehicle'])->name('unpark.vehicle');
 

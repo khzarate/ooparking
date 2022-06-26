@@ -35,6 +35,7 @@
             id="plateNumber"
             placeholder="Vehicle plate number"
             />
+            <yupValidationError :error="errors.plate_number"/>
         </div>
         <div class="px-8 py-4">
             <label for="plateNumber" class="form-label inline-block mb-2 text-gray-700"
@@ -57,6 +58,7 @@
                 <option selected>Select Vehicle Type</option>
                 <option v-for="type in vehicleTypeOptions" :key="type.id" :value="type.value">{{ type.label }}</option>
             </select>
+            <yupValidationError :error="errors.vehicle_type"/>
         </div>
         <div class="px-8 py-4">
             <label for="plateNumber" class="form-label inline-block mb-2 text-gray-700"
@@ -79,11 +81,13 @@
                 <option selected>Select Entry Point</option>
                 <option v-for="type in entryExitPointsOptions" :key="type.id" :value="type.value">{{ type.label }}</option>
             </select>
+            <yupValidationError :error="errors.entry_point"/>
         </div>
         <div class="px-8 py-4">
             <label for="timeIn" class="form-label inline-block mb-2 text-gray-700"
             >Time In</label>
             <Datepicker v-model="input.time_in" :is24="false"></Datepicker> 
+            <yupValidationError :error="errors.time_in"/>
         </div>
 
         <div class="px-8 py-4">
@@ -121,6 +125,7 @@
             id="plateNumber"
             placeholder="Vehicle plate number"
             />
+            <yupValidationError :error="errors.plate_number"/>
         </div>
         <div class="px-8 py-4">
             <label for="plateNumber" class="form-label inline-block mb-2 text-gray-700"
@@ -143,11 +148,13 @@
                 <option selected>Select Entry Point</option>
                 <option v-for="type in entryExitPointsOptions" :key="type.id" :value="type.value">{{ type.label }}</option>
             </select>
+            <yupValidationError :error="errors.exit_point"/>
         </div>
         <div class="px-8 py-4">
             <label for="timeOut" class="form-label inline-block mb-2 text-gray-700"
             >Time Out</label>
             <Datepicker v-model="input.time_out" :is24="false"></Datepicker> 
+            <yupValidationError :error="errors.time_out"/>
         </div>
 
         <div class="px-8 py-4">
@@ -161,8 +168,14 @@
     import axios from 'axios';
 
     import AppButton from "../Components/Button";
+    import yupValidationError from "../Components/yupValidationError";
 
     import useAsync from "../composables/useAsync";
+    import useYup from '../composables/useYup';
+    import { parkVehicleSchema } from '../schema/parkVehicleSchema'
+    import { unparkVehicleSchema } from '../schema/unparkVehicleSchema'
+
+
     import parkingServices from "../services/parkingServices";
     import Swal from "sweetalert2";
     import Datepicker  from "@vuepic/vue-datepicker";
@@ -175,6 +188,7 @@
             axios,
             AppButton,
             Datepicker,
+            yupValidationError
         },
         props: [
 
@@ -212,7 +226,8 @@
                     }
                 ],
                 parkForm: true,
-                unparkForm: false
+                unparkForm: false,
+                errors: {},
             }
 
         },
@@ -221,58 +236,63 @@
         },
         methods: {
             async parkVehicle(){
-                const payload = {
-                    plate_number: this.input.plate_number,
-                    vehicle_type: this.input.vehicle_type,
-                    entry_point: this.input.entry_point,
-                    time_in: dayjs(this.input.time_in).format('YYYY-MM-DD HH:mm:ss')
+                this.errors = await useYup(parkVehicleSchema, {...this.input});
+                if(!Object.entries(this.errors).length) {
+                    const payload = {
+                        plate_number: this.input.plate_number,
+                        vehicle_type: this.input.vehicle_type,
+                        entry_point: this.input.entry_point,
+                        time_in: dayjs(this.input.time_in).format('YYYY-MM-DD HH:mm:ss')
+                    }
+                    const { response } = await useAsync(
+                        parkingServices.parkVehicle(payload)
+                    );
+                    console.log(response);  
+                    if(response.status == 200){
+                        Swal.fire({
+                            icon: 'success',
+                            title: response.data.message,
+                            html: response.data.text,
+                            didClose: () => {
+                                this.input = {};
+                            }
+                        });
+                    } else if(response.status == 202){
+                        Swal.fire({
+                            icon: 'warning',
+                            title: response.data.message,
+                            html: response.data.text
+                        });
+                    }
                 }
-                console.log(payload);
-                const { response } = await useAsync(
-                    parkingServices.parkVehicle(payload)
-                );
-                console.log(response);  
-                if(response.status == 200){
-                    Swal.fire({
-                        icon: 'success',
-                        title: response.data.message,
-                        html: response.data.text,
-                        didClose: () => {
-                            this.input = {};
-                        }
-                    });
-                } else if(response.status == 202){
-                    Swal.fire({
-                        icon: 'warning',
-                        title: response.data.message,
-                        html: response.data.text
-                    });
-                }
-
             },
             async unparkVehicle(){
-                const payload = {
-                    plate_number: this.input.plate_number,
-                    exit_point: this.input.exit_point,
-                    time_out: dayjs(this.input.time_out).format('YYYY-MM-DD HH:mm:ss')
-                }
+                this.errors = await useYup(unparkVehicleSchema, {...this.input});
 
-                const { response } = await useAsync(parkingServices.unparkVehicle(payload))
-                if(response.status == 200) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: response.data.message,
-                        html: response.data.text,
-                        didClose: () => {
-                            this.input = {};
-                        }
-                    });
-                } else if(response.status == 202) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: response.data.message,
-                        html: response.data.text
-                    });
+                if(!Object.entries(this.errors).length) {
+                    const payload = {
+                        plate_number: this.input.plate_number,
+                        exit_point: this.input.exit_point,
+                        time_out: dayjs(this.input.time_out).format('YYYY-MM-DD HH:mm:ss')
+                    }
+    
+                    const { response } = await useAsync(parkingServices.unparkVehicle(payload))
+                    if(response.status == 200) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: response.data.message,
+                            html: response.data.text,
+                            didClose: () => {
+                                this.input = {};
+                            }
+                        });
+                    } else if(response.status == 202) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: response.data.message,
+                            html: response.data.text
+                        });
+                    }
                 }
             }
         },
