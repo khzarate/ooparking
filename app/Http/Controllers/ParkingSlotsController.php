@@ -24,6 +24,10 @@ class ParkingSlotsController extends Controller
         $this->parkingFeeController = new ParkingFeeController();
     }
 
+    public function fetchSlots(){
+        return $this->parkingSlotsService->parkingSlotsCount();
+    }
+
     public function convertSlotType($slot_type){
         Switch($slot_type) {
             case "1":

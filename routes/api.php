@@ -18,7 +18,8 @@ use App\Http\Controllers\ParkingSlotsController;
 |
 */
 
-Route::post('/park-vehicle', [ParkingSlotsController::class, 'parkVehicle'])->name('park.vehicle');
-Route::post('/unpark-vehicle', [ParkingSlotsController::class, 'unparkVehicle'])->name('unpark.vehicle');
+Route::get('/slot-count', [ParkingSlotsController::class, 'fetchSlots']);
+Route::post('/park-vehicle', [ParkingSlotsController::class, 'parkVehicle']);
+Route::post('/unpark-vehicle', [ParkingSlotsController::class, 'unparkVehicle']);
 
 

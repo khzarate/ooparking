@@ -53,4 +53,44 @@ class ParkingSlotsService
         return ParkingSlots::where('id', $id)->update(['parked_vehicle_id' => $parked_vehicle_id]);
     }
 
+    public function parkingSlotsCount(){
+        $count = array();
+
+        $SP = ParkingSlots::where('slot_type', 1)->get();
+        $s_count = 0; $s_parked = 0;
+        foreach($SP as $p){
+            if($p->parked_vehicle_id != null){
+                $s_parked++;
+            }
+            $s_count++;
+        }
+        $count['SP'][0] = $s_parked;
+        $count['SP'][1] = $s_count;
+
+        $MP = ParkingSlots::where('slot_type', 2)->get();
+        $m_count = 0; $m_parked = 0;
+        foreach($MP as $p){
+            if($p->parked_vehicle_id != null){
+                $m_parked++;
+            }
+            $m_count++;
+        }
+        $count['MP'][0] = $m_parked;
+        $count['MP'][1] = $m_count;
+
+        $LP = ParkingSlots::where('slot_type', 3)->get();
+        $l_count = 0; $l_parked = 0;
+        foreach($LP as $p){
+            if($p->parked_vehicle_id != null){
+                $l_parked++;
+            }
+            $l_count++;
+        }
+        $count['LP'][0] = $l_parked;
+        $count['LP'][1] = $l_count;
+
+        return $count;
+    
+    }
+
 }
